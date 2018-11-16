@@ -1,0 +1,12 @@
+eclipse.preferences.version=1
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.334758472/CC/delimiter=;
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.334758472/CC/operation=append
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.334758472/CC/value=clang-cl
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.334758472/CMAKE_CXX_COMPILER/delimiter=;
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.334758472/CMAKE_CXX_COMPILER/operation=replace
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.334758472/CMAKE_CXX_COMPILER/value=C\:\\Users\\K1\\cppdev\\emsdk\\emscripten\\1.38.18\\em++
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.334758472/CMAKE_C_COMPILER/delimiter=;
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.334758472/CMAKE_C_COMPILER/operation=append
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.334758472/CMAKE_C_COMPILER/value=C\:\\Users\\K1\\cppdev\\emsdk\\emscripten\\1.38.18\\emcc.exe
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.334758472/append=true
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.334758472/appendContributed=true

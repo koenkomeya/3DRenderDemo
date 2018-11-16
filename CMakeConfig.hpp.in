@@ -1,0 +1,26 @@
+#define GAME_VERSION_MAJOR @KCPPGame01_VERSION_MAJOR@ 
+#define GAME_VERSION_MINOR @KCPPGame01_VERSION_MINOR@
+
+#cmakedefine TARGET_WEB_EM_GLES3_0
+#cmakedefine TARGET_WEB_EM_WEBGL2_0
+#cmakedefine TARGET_WIN_VUL1_1
+#cmakedefine TARGET_UNIX_VUL1_1
+#cmakedefine TARGET_MACOS_VUL1_1
+#cmakedefine TARGET_IOS_VUL1_1
+#cmakedefine TARGET_SERVER 
+
+#cmakedefine TARGET_ANDROID_VUL1_1 
+#cmakedefine TARGET_ANDROID_GLES3_0
+
+#cmakedefine TARGET_ATTR_BIGENV_WEB 
+#cmakedefine TARGET_ATTR_BIGENV_APP
+
+#cmakedefine TARGET_ATTR_TOOL_EM 
+
+#cmakedefine TARGET_ATTR_WIND_GLFW 
+
+#cmakedefine TARGET_ATTR_NET_EM
+
+#cmakedefine TARGET_ATTR_REND_WEBGL2_0 
+#cmakedefine TARGET_ATTR_REND_GLES_3_0 
+#cmakedefine TARGET_ATTR_REND_VUL_1_1

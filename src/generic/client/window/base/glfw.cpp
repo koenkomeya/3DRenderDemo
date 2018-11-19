@@ -26,6 +26,7 @@ namespace kGenWinOSBase{
 namespace kGenWindow{
 
     Frame::Frame(key_t width, key_t height, const char *title){
+        glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 #ifdef TARGET_ATTR_REND_GLES_3_0
         glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -54,6 +55,7 @@ namespace kGenWindow{
         this->win = win;
         glfwSetWindowUserPointer(win, this);
         glfwMakeContextCurrent(win);
+        glfwGetWindowSize(this->win, &this->width, &this->height);
     }
 
     Frame::~Frame(){
@@ -68,6 +70,24 @@ namespace kGenWindow{
 
     void Frame::swapBuffers(){
         glfwSwapBuffers(this->win);
+    }
+
+    void Frame::pollEvents(){
+        glfwPollEvents();
+    }
+
+    void Frame::requestLock(){
+        glfwSetInputMode(this->win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+
+    bool Frame::isLocked(){
+        return glfwGetInputMode(this->win, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
+    }
+
+    void Frame::getCursorPos (double *x, double *y){
+        glfwGetCursorPos(this->win, x, y);
+        *x -= this->width;
+        *y -= this->height;
     }
 
 #ifdef TARGET_ATTR_RENDFB_GLES_2_0

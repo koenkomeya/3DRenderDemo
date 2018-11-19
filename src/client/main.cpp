@@ -19,12 +19,22 @@ void usleep(int time); //<- To fix syntax highlighting errors
 # endif
 #endif
 #include "client/window.hpp"
+#include "client/render.hpp"
+#include "client/game.hpp"
 
 /**
  * Initializes
  */
 void init(){
     kWindow::initModule();
+
+}
+
+kGame::GameData data;
+
+void tick(){
+    data.getPlayer()->tick();
+    kRender::render(data.frame, &data);
 }
 
 /**
@@ -32,10 +42,13 @@ void init(){
  */
 int main_client(int argc, char **argv) {
     init();
-    kWindow::GFrame frame;
-    while (true){
-
-    }
+    data.frame = new kWindow::GFrame();
+    kRender::init(data.frame);
+#ifdef TARGET_ATTR_TOOL_EM
+    emscripten_set_main_loop(&tick, 60, 1);
+#else
+#error "Main loop not implemented for target"
+#endif
     return 0;
 }
 

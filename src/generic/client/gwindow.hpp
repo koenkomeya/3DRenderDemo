@@ -157,6 +157,39 @@ namespace kGenWindow{
         **/
         void swapBuffers();
 
+        /**
+         * @fn pollEvents
+         * @brief polls for windowing events if necessary.
+         * @since November 19, 2018 02:31
+        **/
+        void pollEvents();
+
+        /**
+         * @fn requestLock
+         * @brief requests pointer lock
+         * @since November 19, 2018 04:06
+        **/
+        void requestLock();
+
+        /**
+         * @fn isLocked
+         * @brief determines if pointer lock is active
+         * @return whether or not pointer lock is active
+         * @since November 19, 2018 04:07
+        **/
+        bool isLocked();
+
+        /**
+         * @fn getCursorPos
+         * @brief gets the location of the cursor
+         *
+         * @param   x  x position
+         * @param   y  y position
+         *
+         * @since November 19, 2018 04:34
+        **/
+        void getCursorPos (double *x, double *y);
+
 #ifdef TARGET_ATTR_RENDFB_GLES_2_0
         /**
          * @fn isUsingFallback
@@ -167,6 +200,7 @@ namespace kGenWindow{
         bool isUsingFallback();
 #endif
     private:
+        int width, height;
 #ifdef TARGET_ATTR_WIND_GLFW
         GLFWwindow *win;
 #else

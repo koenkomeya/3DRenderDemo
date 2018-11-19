@@ -12,6 +12,11 @@
 #include <iostream>
 #include <GLES3/gl3.h>
 #include "client/window.hpp"
+#include "client/render.hpp"
+#include "client/game.hpp"
+
+//FIXME implement functions instead of delegating?
+
 //Simple lighting vertex shader shamelessly taken from the
 // OpenGLES 2.0 Quick Reference Card
 const GLchar lightingVS[] =
@@ -24,9 +29,9 @@ const GLchar lightingVS[] =
         "varying float vcalcDiffuse; \n" //varying means it interpolates
         "varying vec2 vvertTex; \n"
         "void main() {\n"
-        "    vec3 eyeCoordNorm = normalize(myVecmatrix * vertNorm)\n"
-        "    vcalcDiffuse = normalize(myVecmatrix * vertNorm)\n"
-        "    vvertTex = vertTex\n"
+        "    vec3 eyeCoordNorm = normalize(myVecmatrix * vertNorm);\n"
+        "    vcalcDiffuse = normalize(myVecmatrix * vertNorm);\n"
+        "    vvertTex = vertTex;\n"
         "    gl_Position = mvVertmatrrix * vec4(vertPos, 1.0);\n"
         "}";
 
@@ -35,16 +40,46 @@ const GLchar lightingVS[] =
 // FIXED ALPHA, AND GAMMA
 #define LIGHTING_FRAG_SHADER_COMMON \
         "uniform sampler2D texture; \n"\
-        "uniform vec4 ambient; \n"\
-        "uniform vec4 lightColor; \n"\
-        "uniform float gamma; \n"\
-        "uniform float gammaInv; \n"\
-        "varying float vcalcDiffuse; \n" //varying means it interpolates \
+        "uniform vec3 ambient; \n"\
+        "uniform vec3 lightColor; \n"\
+        "varying float vcalcDiffuse; \n" /*varying means it interpolates*/ \
         "varying vec2 vvertTex; \n"\
         "void main() {\n"\
-        "   vec4 fragTexColor = texture2D(texture, vvertTex);\n" \
-        "   vec4 diffuseColor = lightColor" \
-        "   gl_FragColor = vec4(fragTexColor.a);\n" \
+        "    vec4 fragTexColorG = texture2D(texture, vvertTex);\n"\
+        "    vec3 fragTexColorRGB;\n"\
+        "    if (fragTexColorG.r > 0.04045){\n"\
+        "        fragTexColorRGB.r = pow((fragTexColorG.r+0.055)/1.055,2.4);\n"\
+        "    } else {\n"\
+        "        fragTexColorRGB.r = fragTexColorG.r / 12.92;\n"\
+        "    }\n"\
+        "    if (fragTexColorG.g > 0.04045){\n"\
+        "        fragTexColorRGB.g = pow((fragTexColorG.g+0.055)/1.055,2.4);\n"\
+        "    } else {\n"\
+        "        fragTexColorRGB.g = fragTexColorG.g / 12.92;\n"\
+        "    }\n"\
+        "    if (fragTexColorG.b > 0.04045){\n"\
+        "        fragTexColorRGB.b = pow((fragTexColorG.b+0.055)/1.055,2.4);\n"\
+        "    } else {\n"\
+        "        fragTexColorRGB.b = fragTexColorG.b / 12.92;\n"\
+        "    }\n"\
+        "    vec3 diffuseColor = vcalcDiffuse * lightColor;\n" \
+        "    vec3 rawFragRGB = min(fragTexColorRGB * (diffuseColor+ambient),1);\n"\
+        "    if (rawTexColorG.r > 0.04045){\n"\
+        "        rawTexColorRGB.r = pow(1.055*rawTexColorG.r-0.055,1/2.4);\n"\
+        "    } else {\n"\
+        "        rawTexColorRGB.r = rawTexColorG.r * 12.92;\n"\
+        "    }\n"\
+        "    if (rawTexColorG.g > 0.04045){\n"\
+        "        rawTexColorRGB.g = pow(1.055*rawTexColorG.g-0.055,1/2.4);\n"\
+        "    } else {\n"\
+        "        rawTexColorRGB.g = rawTexColorG.g * 12.92;\n"\
+        "    }\n"\
+        "    if (rawTexColorG.b > 0.04045){\n"\
+        "        rawTexColorRGB.b = pow(1.055*rawTexColorG.b-0.055,1/2.4);\n"\
+        "    } else {\n"\
+        "        rawTexColorRGB.b = rawTexColorG.b * 12.92;\n"\
+        "    }\n"\
+        "    gl_FragColor = vec4(rawTexColorRGB, fragTexColorG.a);\n" \
         "}"
 
 const GLchar lightingFSHighP[] =
@@ -65,9 +100,9 @@ namespace kRender {
      * @brief Holds data related to the render context.
      * @since November 18, 2018 21:47
     **/
-    struct RenderData{ //TODO move to a gles common header
-        GLint defProgram;
-    };
+    //struct RenderData{ //TODO move to a gles common header
+        //GLint defProgram;
+    //};
 
     void printGLESShaderInfoLog(GLuint shader){
         GLchar log[GLES_LOG_LENGTH];
@@ -81,18 +116,18 @@ namespace kRender {
     }
 
 #ifdef TARGET_ATTR_RENDFB_GLES_2_0
-    void initFB(kWindow::GFrame& frame);
+    void initFB(kWindow::GFrame* frame);
 #endif
 
-    void init (kWindow::GFrame& frame){
+    void init (kWindow::GFrame* frame){
 #ifdef TARGET_ATTR_RENDFB_GLES_2_0
         //Do the fallback if we are using the fallback.
-        if (frame.isUsingFallback()){
+        //if (frame.isUsingFallback()){
             initFB(frame);
             return;
-        }
+        //}
 #endif
-        RenderData& rd = frame.renderData;
+        RenderData& rd = frame->renderData;
 
         const GLchar **vShaders = &lightingVS; //array not const workaround
         GLuint vs = glCreateShader(GL_VERTEX_SHADER);
@@ -127,44 +162,69 @@ namespace kRender {
                         "Failed to compile GLES3 fragment shader");
             }
         }
+        //Create the program
         GLuint program = glCreateProgram();
         if (program == 0){
             printGLESProgramInfoLog(program);
             throw std::runtime_error("Failed to create GLES3 program");
         }
+        //Attach shaders
         glAttachShader(program, vs);
         glAttachShader(program, fs);
-
+        //Bind attributes to the shaders
         glBindAttribLocation(program, 0, "vertPos");
         glBindAttribLocation(program, 1, "vertNorm");
         glBindAttribLocation(program, 2, "vertTex");
-
+        //Link and check to make sure everything went fine
         glLinkProgram(program);
         glGetProgramiv(program, GL_LINK_STATUS, &glSuccess);
         if (glSuccess == GL_FALSE){
             printGLESProgramInfoLog(program);
             throw std::runtime_error("Failed to link GLES3 program");
         }
-        frame.renderData.defProgram = program;
+        //frame.renderData.defProgram = program;
+        //Since we only have one program, we can just call this here.
+        glUseProgram(program);
 
         glClearColor(0.5, 0.6, 1, 1);
     }
 
 #ifdef TARGET_ATTR_RENDFB_GLES_2_0
-    void renderFB(kWindow::GFrame& frame);
+    void renderFB(kWindow::GFrame* frame, kGame::GameData* data);
 #endif
 
-    void render(kWindow::GFrame& frame){
+
+    void render(kWindow::GFrame* frame, kGame::GameData* data){
 #ifdef TARGET_ATTR_RENDFB_GLES_2_0
         //Do the fallback if we are using the fallback.
-        if (frame.isUsingFallback()){
-            renderFB(frame);
+        //if (frame.isUsingFallback()){
+            renderFB(frame, data);
             return;
-        }
+        //}
 #endif
-        RenderData& renderData = frame.renderData;
+        RenderData* renderData = frame->renderData;
+        //Set
+        //Render stuff
+        kRender::render_common(frame, data);
+        //Flush and display
+        glFlush();
+        frame->swapBuffers();
+    }
 
-        frame.swapBuffers();
+
+    void renderFBPlayer (kWindow::GFrame* frame, kGame::Player* player);
+    void renderFBLand (kWindow::GFrame* frame, kGame::GameData *data);
+
+    void renderPlayer (kWindow::GFrame* frame, kGame::Player* player){
+        renderFBPlayer(frame, player);
+    }
+
+    void renderLand (kWindow::GFrame* frame, kGame::GameData *data){
+        renderFBLand(frame, data);
+    }
+
+    void renderNag (kWindow::GFrame* frame){
+        //FIXME implement
     }
 
 }  // namespace kRender

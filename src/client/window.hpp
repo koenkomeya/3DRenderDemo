@@ -10,13 +10,16 @@
 
 #ifndef CLIENT_WINDOW_HPP_
 #define CLIENT_WINDOW_HPP_
-
+#include "k.hpp"
 #include "generic/client/gwindow.hpp"
 
-//definition for RenderData (since we can't circular include render.hpp)
-namespace kRender{
-    struct RenderData;
-}
+#ifdef TARGET_ATTR_REND_GLES_3_0
+#include "client/render/gles.hpp"
+#else
+#error "kRender::RenderData structure not implemented for target"
+#endif
+
+namespace kGame{ class GameData;}
 
 /**
  * @namespace kWindow
@@ -44,9 +47,12 @@ namespace kWindow{
     class GFrame : kGenWindow::Frame{
     public:
         kRender::RenderData renderData;
-        GFrame();
+        GFrame() = delete;
+        GFrame(kGame::GameData *gameData);
         ~GFrame();
+        inline kGame::GameData *getGameData(){ return this->gameData;}
     private:
+        const kGame::GameData *gameData;
     };
 }
 

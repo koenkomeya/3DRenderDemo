@@ -1,8 +1,16 @@
-#define GAME_VERSION_MAJOR @KCPPGame01_VERSION_MAJOR@ 
-#define GAME_VERSION_MINOR @KCPPGame01_VERSION_MINOR@
+/**
+ * @file CMakeConfig.hpp
+ * 
+ * Contains target-dependent defines.
+ *
+ * @author Koen Komeya
+ */ 
+
+#define KGAME_NAME "@PROJECT_NAME@"
+#define KGAME_VERSION_MAJOR @KCPPGame01_VERSION_MAJOR@ 
+#define KGAME_VERSION_MINOR @KCPPGame01_VERSION_MINOR@
 
 #cmakedefine TARGET_WEB_EM_GLES3_0
-#cmakedefine TARGET_WEB_EM_WEBGL2_0
 #cmakedefine TARGET_WIN_VUL1_1
 #cmakedefine TARGET_UNIX_VUL1_1
 #cmakedefine TARGET_MACOS_VUL1_1
@@ -21,6 +29,8 @@
 
 #cmakedefine TARGET_ATTR_NET_EM
 
-#cmakedefine TARGET_ATTR_REND_WEBGL2_0 
+//#cmakedefine TARGET_ATTR_REND_WEBGL2_0 
 #cmakedefine TARGET_ATTR_REND_GLES_3_0 
 #cmakedefine TARGET_ATTR_REND_VUL_1_1
+
+#cmakedefine TARGET_ATTR_RENDFB_GLES_2_0 

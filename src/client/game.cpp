@@ -9,7 +9,7 @@
 #include <cmath>
 
 namespace kGame {
-    Player::Player(kGame::GameData data) : gameData(data){};
+    Player::Player(kGame::GameData *data) : gameData(data){};
     void Player::tick(){
         double speed = 1.5;
         kWindow::GFrame *frame = this->gameData->frame;

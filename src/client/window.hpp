@@ -44,15 +44,14 @@ namespace kWindow{
      *
      * @since November 17, 2018 21:47
     **/
-    class GFrame : kGenWindow::Frame{
+    class GFrame : public kGenWindow::Frame{
     public:
         kRender::RenderData renderData;
         GFrame() = delete;
         GFrame(kGame::GameData *gameData);
-        ~GFrame();
         inline kGame::GameData *getGameData(){ return this->gameData;}
     private:
-        const kGame::GameData *gameData;
+        kGame::GameData * const gameData;
     };
 }
 

@@ -199,7 +199,7 @@ namespace kGenWindow{
         **/
         bool isUsingFallback();
 #endif
-    private:
+    protected:
         int width, height;
 #ifdef TARGET_ATTR_WIND_GLFW
         GLFWwindow *win;

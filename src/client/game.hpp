@@ -29,7 +29,7 @@ namespace kGame {
     class Player {
     public:
         Player() = delete;
-        Player(kGame::GameData);
+        Player(kGame::GameData *);
         /** Coords */
         double x = 0, y = 0, z = 0;
         double yaw = 0, pitch = 0;

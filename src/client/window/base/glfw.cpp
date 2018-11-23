@@ -20,14 +20,13 @@ namespace kWindow{
     void winrefresh(GLFWwindow *win){
         void *p = glfwGetWindowUserPointer(win);
         if (p == nullptr) throw std::runtime_error("unexpected null userptr");
-        GFrame *f = reinterpret_cast<GFrame>(p);
+        GFrame *f = reinterpret_cast<GFrame*>(p);
         kRender::render(f, f->getGameData());
     }
 
     GFrame::GFrame(kGame::GameData *data) : kGenWindow::Frame(KGAME_DEF_WIDTH,
-            KGAME_DEF_HEIGHT, KGAME_DEF_TITLE){
+            KGAME_DEF_HEIGHT, KGAME_DEF_TITLE), gameData(data) {
         glfwSetWindowRefreshCallback(this->win, &winrefresh);
-        this->gameData = data;
     }
 }
 

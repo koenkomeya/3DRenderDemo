@@ -42,7 +42,7 @@ void tick(){
  */
 int main_client(int argc, char **argv) {
     init();
-    data.frame = new kWindow::GFrame();
+    data.frame = new kWindow::GFrame(&data);
     kRender::init(data.frame);
 #ifdef TARGET_ATTR_TOOL_EM
     emscripten_set_main_loop(&tick, 60, 1);

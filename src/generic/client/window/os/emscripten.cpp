@@ -16,8 +16,9 @@
 #include "../../gwindow.hpp"
 #include "generic/client/window/base/base_req.hpp"
 
-const char *safeToClose   = "window.onbeforeunload = function(e){return \"Game is presently running!\";}";
-const char *unsafeToClose = "window.onbeforeunload = null;}";
+const char *safeToClose   = "window.onbeforeunload = null;";
+const char *unsafeToClose = "window.onbeforeunload = function(e){"
+        "return \"Game is presently running!\";}";
 
 namespace kGenWindow{
     void initModule(){

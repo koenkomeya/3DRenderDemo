@@ -11,6 +11,9 @@ set (KCPPGame01_VERSION_MINOR 1)
 
 
 # JUST SOME LOGIC (IGNORE)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(TARGET_DEBUG 1)
+endif()
 
 set(${BTARGET} 1)
 

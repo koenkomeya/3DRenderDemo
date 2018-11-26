@@ -34,7 +34,7 @@ namespace kGame {
             this->z -= speed / 60 * sin((long double)this->yaw);
             move = true;
         }
-        if (move){
+        if (move || animStep % 60 != 0){
             this->animStep++;
         } else {
             this->animStep = 0;

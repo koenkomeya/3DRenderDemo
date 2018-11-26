@@ -215,6 +215,13 @@ namespace kRender {
         glDepthFunc(GL_LEQUAL);
         //Use the full depth range
         glDepthRangef(-1.0,1.0);
+        //Only render front face
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        //Transparency!
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendEquation(GL_FUNC_ADD);
         //Set clear color
         glClearColor(0.5, 0.6, 1, 1);
         GLenum err;
@@ -240,7 +247,8 @@ namespace kRender {
         //Set viewport uniforms
         GLfloat light[] = {0.2,1.0,0.1}; //Light in the shader is dot prod, so rev dir.
         GLfloat mvpv[16], mvv[9], il[3];
-        kRender::glesCreateMatrices(0, 1.5, 0, p->yaw, p->pitch,
+        float hop = std::abs(std::sin(p->animStep * M_PI / 60.0))/ 2.0;
+        kRender::glesCreateMatrices(0, 1.5 - hop, 0, p->yaw, p->pitch,
                 0.5 /*FOV = 90*/, 16.0/9.0, 0.001, 4.0, light, mvpv, mvv, il);
         glUniformMatrix4fv(rd->mvpvertUni, 1, GL_FALSE, mvpv);
         glUniformMatrix3fv(rd->mvvecUni, 1, GL_FALSE, mvv);
@@ -264,7 +272,7 @@ namespace kRender {
     constexpr double sqrt3_2 = kMath::sqrtNR<double>(3.0l) / 2;
     constexpr double sqrt3_3 = kMath::sqrtNR<double>(3.0l) / 3;
     /** Represents the alpha values to render the polygons with. */
-    unsigned char alpha[32][32];
+    GLfloat alpha[32][32];
     void renderFBLand (kWindow::GFrame* frame, kGame::GameData *data){
         kGame::Player *player = data->getPlayer();
         kGame::Player *p = data->getPlayer();
@@ -318,13 +326,13 @@ namespace kRender {
                         if (hyp < 3){
                             alpha[xt & 31][zt & 31] = 1;
                         } else {
-                            alpha[xt & 31][zt & 31] = (char)
-                                    (1/51+(alpha[xt&31][zt&31]) * 50 / 51);
+                            alpha[xt & 31][zt & 31] =
+                                    (1.0/17+(alpha[xt&31][zt&31]) * 16 / 17);
                         }
                     } else {
                         if (hyp > 5){
-                            alpha[xt & 31][zt & 31] = (char)
-                                    ((alpha[xt&31][zt&31]) * 120 / 121);
+                            alpha[xt & 31][zt & 31] =
+                                    ((alpha[xt&31][zt&31]) * 50 / 51);
                         }
                     }
                 } else if (hyp < 7){

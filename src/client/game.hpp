@@ -19,6 +19,12 @@
  */
 namespace kGame {
 
+    /**
+     * @brief Determines length of a player step animation in frames.
+     * @since November 26, 2018 00:20
+    **/
+    constexpr int PLAYER_STEP_FRAMES = 60;
+
     class GameData;
     /**
      * @class Player

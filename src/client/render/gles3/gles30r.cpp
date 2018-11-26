@@ -34,11 +34,13 @@ namespace kRender {
         GLchar log[GLES_LOG_LENGTH];
         glGetShaderInfoLog(shader, GLES_LOG_LENGTH, nullptr, log);
         std::cerr << log;
+        std::flush(std::cerr);
     }
     void printGLESProgramInfoLog(GLuint program){
         GLchar log[GLES_LOG_LENGTH];
         glGetProgramInfoLog(program, GLES_LOG_LENGTH, nullptr, log);
         std::cerr << log;
+        std::flush(std::cerr);
     }
 
 #ifdef TARGET_ATTR_RENDFB_GLES_2_0

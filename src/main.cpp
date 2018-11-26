@@ -28,7 +28,8 @@ int main(int argc, char **argv) {
 
 #ifdef TARGET_DEBUG
     } catch (std::exception &ex){
-        std::puts(ex.what());
+        std::fputs(ex.what(), stderr);
+        std::fflush(stderr);
     }
 #endif
 }

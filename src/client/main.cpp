@@ -27,7 +27,6 @@ void usleep(int time); //<- To fix syntax highlighting errors
  */
 void init(){
     kWindow::initModule();
-
 }
 
 kGame::GameData data;

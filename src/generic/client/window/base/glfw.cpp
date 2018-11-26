@@ -55,6 +55,7 @@ namespace kGenWindow{
         this->win = win;
         glfwSetWindowUserPointer(win, this);
         glfwMakeContextCurrent(win);
+        glfwSwapInterval(1);
         glfwGetWindowSize(this->win, &this->width, &this->height);
     }
 
@@ -81,13 +82,35 @@ namespace kGenWindow{
     }
 
     bool Frame::isLocked(){
-        return glfwGetInputMode(this->win, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
+        bool lock;
+        lock = glfwGetInputMode(this->win, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
+        if (!lock) wasLocked = false;
+        return lock;
     }
 
-    void Frame::getCursorPos (double *x, double *y){
-        glfwGetCursorPos(this->win, x, y);
-        *x -= this->width;
-        *y -= this->height;
+    void Frame::getCursorPos (double &x, double &y){
+        glfwGetCursorPos(this->win, &x, &y);
+    }
+
+    void Frame::getCursorOffset (double &x, double &y){
+        if (!wasLocked){
+            if(glfwGetInputMode(this->win, GLFW_CURSOR)==GLFW_CURSOR_DISABLED){
+                wasLocked = true;
+                glfwGetCursorPos(this->win, &c_lastX, &c_lastY);
+                x = 0;
+                y = 0;
+            }
+        } else if (glfwGetInputMode(this->win, GLFW_CURSOR) ==
+                GLFW_CURSOR_DISABLED){
+            double cx, cy;
+            glfwGetCursorPos(this->win, &cx, &cy);
+            x = cx - c_lastX;
+            y = cy - c_lastY;
+            c_lastX = cx;
+            c_lastY = cy;
+        } else {
+            wasLocked = false;
+        }
     }
 
 #ifdef TARGET_ATTR_RENDFB_GLES_2_0

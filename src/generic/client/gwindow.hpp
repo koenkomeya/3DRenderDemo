@@ -183,12 +183,25 @@ namespace kGenWindow{
          * @fn getCursorPos
          * @brief gets the location of the cursor
          *
-         * @param   x  x position
-         * @param   y  y position
+         * @param   x  pointer to hold x position
+         * @param   y  pointer to hold y position
          *
          * @since November 19, 2018 04:34
         **/
-        void getCursorPos (double *x, double *y);
+        void getCursorPos (double &x, double &y);
+
+        /**
+         * @fn getCursorOffset
+         * @brief gets the amount the cursor moved since the last call
+         * Gets the amount the cursor moved since the last call assuming that
+         * the cursor is locked.
+         *
+         * @param   x  pointer to hold x offset
+         * @param   y  pointer to hold y offsest
+         *
+         * @since November 24, 2018 21:17
+        **/
+        void getCursorOffset (double &x, double &y);
 
 #ifdef TARGET_ATTR_RENDFB_GLES_2_0
         /**
@@ -208,6 +221,14 @@ namespace kGenWindow{
 #endif
 #ifdef TARGET_ATTR_RENDFB_GLES_2_0
         bool usingFallback = false;
+#endif
+    private:
+#ifdef TARGET_ATTR_WIND_GLFW
+        bool wasLocked = false;
+        /** Last x-offset of cursor */
+        double c_lastX;
+        /** Last y-offset of cursor */
+        double c_lastY;
 #endif
     };
 

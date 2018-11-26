@@ -27,21 +27,21 @@ const GLchar lightingVS[] =
         "varying float vcalcDiffuse; \n" //varying means it interpolates
         "varying vec2 vvertTex; \n"
         "void main() {\n"
-        "    vec3 eyeCoordNorm = normalize(mvVecmatrix * vertNorm);\n"
+        "    vec3 eyeCoordNorm = normalize(mvVecMatrix * vertNorm);\n"
         "    vcalcDiffuse = max(dot(eyeCoordLightVec, eyeCoordNorm), 0.0);\n"
         "    vvertTex = vertTex;\n"
-        "    gl_Position = mvpVertmatrrix * vec4(vertPos, 1.0);\n"
+        "    gl_Position = mvpVertMatrix * vec4(vertPos, 1.0);\n"
         "}";
 
 //Simple lighting fragment shader shamelessly taken from the
 // OpenGLES 2.0 Quick Reference Card BUT WITH COLORED LIGHT,
 // FIXED ALPHA, AND GAMMA=
 const GLchar lightingFS[] =
-        "#ifdef GL_FRAGMENT_PRECISION_HIGH"
-        "precision highp float;"
-        "#else"
-        "precision mediump float;"
-        "#endif"
+        "#ifdef GL_FRAGMENT_PRECISION_HIGH \n"
+        "precision highp float; \n"
+        "#else \n"
+        "precision mediump float;\n"
+        "#endif \n"
         "uniform sampler2D texture; \n"
         "uniform vec3 ambient; \n"
         "uniform vec3 lightColor; \n"
@@ -66,23 +66,27 @@ const GLchar lightingFS[] =
         "    } else {\n"
         "        fragTexColorRGB.b = fragTexColorG.b / 12.92;\n"
         "    }\n"
+ //       "    fragTexColorRGB = pow(fragTexColorG,2.4);\n"
         "    vec3 diffuseColor = vcalcDiffuse * lightColor;\n"
-        "    vec3 rawFragRGB = min(fragTexColorRGB * (diffuseColor+ambient),1);\n"
+        "    vec3 rawFragRGB=min(fragTexColorRGB*(diffuseColor+ambient),1.0);\n"
+        "    vec3 rawTexColorG = rawFragRGB;\n"
+        "    vec3 rawTexColorRGB;\n"
         "    if (rawTexColorG.r > 0.04045){\n"
-        "        rawTexColorRGB.r = pow(1.055*rawTexColorG.r-0.055,1/2.4);\n"
+        "        rawTexColorRGB.r = pow(1.055*rawTexColorG.r-0.055,1.0/2.4);\n"
         "    } else {\n"
         "        rawTexColorRGB.r = rawTexColorG.r * 12.92;\n"
         "    }\n"
         "    if (rawTexColorG.g > 0.04045){\n"
-        "        rawTexColorRGB.g = pow(1.055*rawTexColorG.g-0.055,1/2.4);\n"
+        "        rawTexColorRGB.g = pow(1.055*rawTexColorG.g-0.055,1.0/2.4);\n"
         "    } else {\n"
         "        rawTexColorRGB.g = rawTexColorG.g * 12.92;\n"
         "    }\n"
         "    if (rawTexColorG.b > 0.04045){\n"
-        "        rawTexColorRGB.b = pow(1.055*rawTexColorG.b-0.055,1/2.4);\n"
+        "        rawTexColorRGB.b = pow(1.055*rawTexColorG.b-0.055,1.0/2.4);\n"
         "    } else {\n"
         "        rawTexColorRGB.b = rawTexColorG.b * 12.92;\n"
         "    }\n"
+//        "    rawTexColorRGB = pow(rawTexColorG,1/2.4);\n"
         "    gl_FragColor = vec4(rawTexColorRGB, fragTexColorG.a * alpha);\n"
         "}";
 
@@ -107,6 +111,11 @@ const GLchar lightingFS[] =
         GLuint playerTex;
         GLuint playerModelVertBuf;
         GLuint playerModelFaceBuf;
+#ifdef TARGET_ATTR_TOOL_EM
+        //Emscripten converts OpenGLES to WebGL which doesn't allow for direct
+        // passing of vertex data
+        GLuint triVertBuf;
+#endif
     };
 
     /**
@@ -156,38 +165,38 @@ const GLchar lightingFS[] =
         //inverse of tan half horizontal fov
         const double io2thhfov = invOf2TanHalfFOV;
         //inverse of tan half vertical fov
-        const double io2thvfov = invOf2TanHalfFOV / cw_ch;
+        const double io2thvfov = invOf2TanHalfFOV * cw_ch;
         mvVec[0] = cosyaw;
-        mvVec[1] = 0;
-        mvVec[2] = -sinyaw;
-        mvVec[3] = sinyaw * sinpit;
+        mvVec[3] = 0;
+        mvVec[6] = -sinyaw;
+        mvVec[1] = sinyaw * sinpit;
         mvVec[4] = cospit;
-        mvVec[5] = cosyaw * sinpit;
-        mvVec[6] = sinyaw * cospit;
-        mvVec[7] = -sinpit;
-        mvVec[8] = cosyaw * cospit;
-        iLight[1] = mvVec[3]*light[0] + mvVec[4]*light[1] + mvVec[5]*light[2];
-        iLight[2] = mvVec[6]*light[0] + mvVec[7]*light[1] + mvVec[8]*light[2];
+        mvVec[7] = cosyaw * sinpit;
+        mvVec[2] = -sinyaw * cospit;
+        mvVec[5] = sinpit;
+        mvVec[8] = -cosyaw * cospit;
+        iLight[1] = mvVec[1]*light[0] + mvVec[4]*light[1] + mvVec[7]*light[2];
+        iLight[2] = mvVec[2]*light[0] + mvVec[5]*light[1] + mvVec[8]*light[2];
         iLight[0] = cosyaw * light[0] - sinyaw * light[2];
-        mvpVert[1]  = 0;
-        //mvpVert[3]  = 0;
-        //mvpVert[7]  = 0;
+        mvpVert[4]  = 0;
+        //mvpVert[3->12]  = 0;
+        //mvpVert[7->14]  = 0;
         //mvpVert[15] = 0;
         mvpVert[0]  = io2thhfov * cosyaw;
-        mvpVert[2]  = -io2thhfov * sinyaw;
-        mvpVert[4]  = io2thvfov * mvVec[3];
+        mvpVert[8]  = -io2thhfov * sinyaw;
+        mvpVert[1]  = io2thvfov * mvVec[1];
         mvpVert[5]  = io2thvfov * cospit;
-        mvpVert[6]  = io2thvfov * mvVec[5];
-        mvpVert[12] = -mvVec[6];
-        mvpVert[13] = sinpit;
-        mvpVert[14] = -mvVec[8];
-        mvpVert[8]  = mvpVert[12] * onemineps;
-        mvpVert[9]  = mvpVert[13] * onemineps;
-        mvpVert[10] = mvpVert[14] * onemineps;
-        mvpVert[3]  = mvpVert[0] * -cx - mvpVert[2] * cz;
-        mvpVert[7]  = mvpVert[3] * -cx - mvpVert[4] * cy - mvpVert[5] * cz;
-        mvpVert[15] = mvVec[6] * cx - sinpit * cy + mvVec[8] * cz + camDist;
-        mvpVert[11] = (2 - epsilon) * npdist + mvpVert[15] * onemineps;
+        mvpVert[9]  = io2thvfov * mvVec[7];
+        mvpVert[3] = -mvVec[2];
+        mvpVert[7] = sinpit;
+        mvpVert[11] = -mvVec[8];
+        mvpVert[2]  = mvpVert[3] * -onemineps;
+        mvpVert[6]  = mvpVert[7] * -onemineps;
+        mvpVert[10] = mvpVert[11] * -onemineps;
+        mvpVert[12]  = mvpVert[0] * -cx - mvpVert[8] * cz;
+        mvpVert[13]  = mvpVert[1] * -cx - mvpVert[5] * cy - mvpVert[9] * cz;
+        mvpVert[15] = mvVec[2] * cx - sinpit * cy + mvVec[8] * cz + camDist;
+        mvpVert[14] = -(2 - epsilon) * npdist + mvpVert[15] * -onemineps;
     }
 }
 
